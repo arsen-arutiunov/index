@@ -11,6 +11,7 @@
             --secondary: #d49a00;
             --bg: #0f0f0f;
             --surface: #1e1e1e;
+            --accent: #00ff88;
         }
         * {
             box-sizing: border-box;
@@ -26,26 +27,37 @@
             justify-content: space-between;
             height: 100vh;
             margin: 0;
-            padding: 40px 20px;
+            padding: 30px 20px;
             overflow: hidden;
             user-select: none;
         }
         .header {
             width: 100%;
             text-align: center;
+            z-index: 10;
         }
         #score {
-            font-size: 48px;
+            font-size: 56px;
             font-weight: 900;
             color: var(--primary);
-            text-shadow: 0 0 20px rgba(240, 185, 11, 0.3);
-            margin-bottom: 5px;
+            text-shadow: 0 0 20px rgba(240, 185, 11, 0.4);
+            margin: 0;
+            transition: transform 0.1s;
         }
-        .stats {
+        .multiplier-badge {
+            background: var(--accent);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
             font-size: 14px;
-            opacity: 0.6;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-weight: 800;
+            display: inline-block;
+            margin-top: 5px;
+            transform: scale(0);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .multiplier-active {
+            transform: scale(1);
         }
         .game-area {
             flex-grow: 1;
@@ -55,26 +67,42 @@
             width: 100%;
             position: relative;
         }
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            margin-top: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--accent);
+        }
         #coin-wrapper {
             position: relative;
             z-index: 2;
         }
         #coin {
-            width: 240px;
-            height: 240px;
+            width: 250px;
+            height: 250px;
             background: radial-gradient(circle at 30% 30%, #ffd700, var(--secondary));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 100px;
+            font-size: 110px;
             cursor: pointer;
             box-shadow:
                 0 0 0 10px rgba(255, 255, 255, 0.05),
-                0 20px 40px rgba(0,0,0,0.4),
-                inset 0 -10px 20px rgba(0,0,0,0.2);
+                0 30px 60px rgba(0,0,0,0.5),
+                inset 0 -12px 24px rgba(0,0,0,0.3);
             transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 4px solid rgba(255, 255, 255, 0.2);
+            border: 5px solid rgba(255, 255, 255, 0.2);
             position: relative;
             overflow: hidden;
         }
@@ -85,12 +113,13 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
             transform: rotate(45deg);
-            animation: shine 3s infinite;
+            animation: shine 4s infinite;
         }
         @keyframes shine {
             0% { left: -150%; }
+            20% { left: 150%; }
             100% { left: 150%; }
         }
         #coin:active {
@@ -102,59 +131,66 @@
             flex-direction: column;
             align-items: center;
             gap: 15px;
+            z-index: 10;
         }
         .btn {
-            padding: 18px 40px;
+            padding: 20px 40px;
             background: linear-gradient(to right, #2481cc, #1c66a3);
             color: #ffffff;
             border: none;
-            border-radius: 16px;
-            font-size: 18px;
-            font-weight: 700;
+            border-radius: 20px;
+            font-size: 20px;
+            font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(36, 129, 204, 0.3);
+            box-shadow: 0 10px 25px rgba(36, 129, 204, 0.4);
             width: 100%;
-            max-width: 320px;
+            max-width: 340px;
             transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 4px 10px rgba(36, 129, 204, 0.3);
+            transform: translateY(3px);
+            box-shadow: 0 5px 15px rgba(36, 129, 204, 0.4);
         }
-        .plus-one {
+        .floating-text {
             position: fixed;
             color: #ffffff;
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 900;
             pointer-events: none;
-            animation: float-up 0.7s ease-out forwards;
+            animation: float-up 0.8s ease-out forwards;
             z-index: 100;
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            text-shadow: 0 0 15px rgba(0,0,0,0.6);
         }
         @keyframes float-up {
             0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-120px) scale(1.5); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-150px) scale(1.8); opacity: 0; }
         }
         .particle {
             position: fixed;
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             background: var(--primary);
-            border-radius: 50%;
+            border-radius: 2px;
             pointer-events: none;
             z-index: 90;
-            animation: particle-burst 0.6s ease-out forwards;
+            animation: particle-burst 0.7s ease-out forwards;
         }
         @keyframes particle-burst {
-            0% { transform: translate(0, 0); opacity: 1; }
-            100% { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) rotate(360deg); opacity: 0; }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <div id="score">0</div>
-        <div class="stats">Заработано монет</div>
+        <div id="multiplier-badge" class="multiplier-badge">COMBO x1</div>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
     </div>
 
     <div class="game-area">
@@ -172,52 +208,89 @@
         tg.expand();
         tg.ready();
 
-        // Настройка цветов темы
         document.body.style.backgroundColor = tg.themeParams.bg_color || '#0f0f0f';
 
         let score = 0;
+        let lastClickTime = 0;
+        let combo = 0;
+        let multiplier = 1;
+
         const coin = document.getElementById('coin');
         const scoreDisplay = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        const multiplierBadge = document.getElementById('multiplier-badge');
 
         coin.addEventListener('click', (e) => {
-            score++;
+            const now = Date.now();
+
+            // Логика комбо
+            if (now - lastClickTime < 300) {
+                combo++;
+            } else {
+                combo = 0;
+            }
+            lastClickTime = now;
+
+            // Расчет множителя (каждые 10 быстрых кликов повышают множитель)
+            multiplier = 1 + Math.floor(combo / 10);
+            if (multiplier > 5) multiplier = 5; // Максимум x5
+
+            if (multiplier > 1) {
+                multiplierBadge.innerText = `COMBO x${multiplier}`;
+                multiplierBadge.classList.add('multiplier-active');
+            } else {
+                multiplierBadge.classList.remove('multiplier-active');
+            }
+
+            score += multiplier;
             scoreDisplay.innerText = score;
 
-            // Позиция клика для эффектов
+            // Эффект увеличения счета
+            scoreDisplay.style.transform = 'scale(1.1)';
+            setTimeout(() => scoreDisplay.style.transform = 'scale(1)', 100);
+
+            // Прогресс бар (цикл по 100 монет)
+            const progress = (score % 100);
+            progressBar.style.width = `${progress}%`;
+
+            // Эффекты
             const x = e.clientX;
             const y = e.clientY;
-
-            createPlusOne(x, y);
+            createFloatingText(x, y, `+${multiplier}`);
             createParticles(x, y);
 
-            // Тактильный отклик
+            // Вибрация
             if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('light');
+                const intensity = multiplier > 1 ? 'medium' : 'light';
+                tg.HapticFeedback.impactOccurred(intensity);
             }
         });
 
-        function createPlusOne(x, y) {
-            const plus = document.createElement('div');
-            plus.className = 'plus-one';
-            plus.innerText = '+1';
-            plus.style.left = `${x - 15}px`;
-            plus.style.top = `${y - 30}px`;
-            document.body.appendChild(plus);
-            setTimeout(() => plus.remove(), 700);
+        function createFloatingText(x, y, text) {
+            const el = document.createElement('div');
+            el.className = 'floating-text';
+            el.innerText = text;
+            if (multiplier > 1) el.style.color = 'var(--accent)';
+            el.style.left = `${x - 20}px`;
+            el.style.top = `${y - 40}px`;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
         }
 
         function createParticles(x, y) {
-            for (let i = 0; i < 6; i++) {
+            const count = multiplier > 1 ? 12 : 6;
+            for (let i = 0; i < count; i++) {
                 const p = document.createElement('div');
                 p.className = 'particle';
+                if (multiplier > 1) p.style.background = 'var(--accent)';
                 const angle = Math.random() * Math.PI * 2;
-                const dist = 50 + Math.random() * 50;
+                const dist = 60 + Math.random() * 80;
                 p.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
                 p.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
                 p.style.left = `${x}px`;
                 p.style.top = `${y}px`;
                 document.body.appendChild(p);
-                setTimeout(() => p.remove(), 600);
+                setTimeout(() => p.remove(), 700);
             }
         }
 
