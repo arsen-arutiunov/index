@@ -131,17 +131,22 @@
         });
 
         function saveAndClose() {
-            const data = {
+            const data = JSON.stringify({
                 game: "clicker",
                 score: score
-            };
+            });
 
             console.log("Sending data to bot:", data);
 
-            // Отправляем данные боту
-            tg.sendData(JSON.stringify(data));
-
-            // Важно: tg.sendData() закроет приложение автоматически в большинстве версий Telegram
+            try {
+                // Пытаемся отправить данные через sendData
+                tg.sendData(data);
+                // Если sendData не закрыл окно (бывает в некоторых клиентах), закрываем вручную
+                setTimeout(() => tg.close(), 100);
+            } catch (e) {
+                console.error("Error sending data:", e);
+                alert("Ошибка при отправке данных: " + e.message);
+            }
         }
     </script>
 </body>
