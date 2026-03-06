@@ -6,10 +6,14 @@
     <title>Clicker Game</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --primary: #f0b90b;
+            --secondary: #d49a00;
+        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
+            background-color: var(--tg-theme-bg-color, #1a1a1a);
+            color: var(--tg-theme-text-color, #ffffff);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -17,67 +21,127 @@
             height: 100vh;
             margin: 0;
             overflow: hidden;
+            user-select: none;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+        #coin-container {
+            position: relative;
+            margin: 20px 0;
         }
         #coin {
-            width: 200px;
-            height: 200px;
-            background: linear-gradient(145deg, #f0b90b, #d49a00);
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle, var(--primary), var(--secondary));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 80px;
+            font-size: 90px;
             cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            transition: transform 0.1s;
-            user-select: none;
+            box-shadow: 0 0 30px rgba(240, 185, 11, 0.4);
+            transition: transform 0.05s cubic-bezier(0.1, 0, 0.3, 1);
+            border: 8px solid rgba(255, 255, 255, 0.1);
         }
         #coin:active {
-            transform: scale(0.95);
+            transform: scale(0.92);
         }
         #score {
-            font-size: 24px;
-            margin-top: 20px;
-            font-weight: bold;
+            font-size: 36px;
+            margin: 10px 0;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         .btn {
-            margin-top: 30px;
-            padding: 10px 20px;
+            margin-top: 40px;
+            padding: 16px 32px;
             background-color: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #fff);
+            color: var(--tg-theme-button-text-color, #ffffff);
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
+            box-shadow: 0 4px 15px rgba(36, 129, 204, 0.3);
+            width: 80vw;
+            max-width: 300px;
+        }
+        .plus-one {
+            position: absolute;
+            color: var(--primary);
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: float-up 0.8s ease-out forwards;
+            z-index: 10;
+        }
+        @keyframes float-up {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100px); opacity: 0; }
         }
     </style>
 </head>
 <body>
-    <div id="coin">🪙</div>
-    <div id="score">Монет: 0</div>
-    <button class="btn" onclick="saveAndClose()">Забрать награду</button>
+    <div class="container">
+        <div id="score">0</div>
+        <div id="coin-container">
+            <div id="coin">🪙</div>
+        </div>
+        <button class="btn" onclick="saveAndClose()">Забрать награду</button>
+    </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
+        tg.ready();
 
         let score = 0;
         const coin = document.getElementById('coin');
         const scoreDisplay = document.getElementById('score');
+        const coinContainer = document.getElementById('coin-container');
 
-        coin.addEventListener('click', () => {
+        coin.addEventListener('click', (e) => {
             score++;
-            scoreDisplay.innerText = `Монет: ${score}`;
-            tg.HapticFeedback.impactOccurred('medium');
+            scoreDisplay.innerText = score;
+
+            // Визуальный эффект +1
+            const plus = document.createElement('div');
+            plus.className = 'plus-one';
+            plus.innerText = '+1';
+
+            // Позиция клика
+            const rect = coin.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            plus.style.left = `${x}px`;
+            plus.style.top = `${y}px`;
+
+            coinContainer.appendChild(plus);
+
+            // Удаление элемента после анимации
+            setTimeout(() => plus.remove(), 800);
+
+            // Тактильный отклик
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('medium');
+            }
         });
 
         function saveAndClose() {
-            // Отправляем данные обратно боту
-            tg.sendData(JSON.stringify({
+            const data = {
                 game: "clicker",
                 score: score
-            }));
-            tg.close();
+            };
+
+            console.log("Sending data to bot:", data);
+
+            // Отправляем данные боту
+            tg.sendData(JSON.stringify(data));
+
+            // Важно: tg.sendData() закроет приложение автоматически в большинстве версий Telegram
         }
     </script>
 </body>
