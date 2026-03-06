@@ -138,14 +138,16 @@
 
             console.log("Sending data to bot:", data);
 
-            try {
-                // Пытаемся отправить данные через sendData
+            // В Telegram Web App 6.0+ sendData работает только если приложение открыто через KeyboardButton
+            // Для Inline-кнопок лучше использовать MainButton или отправлять через API бота
+            // Но мы попробуем стандартный метод с проверкой готовности
+            if (tg.sendData) {
                 tg.sendData(data);
-                // Если sendData не закрыл окно (бывает в некоторых клиентах), закрываем вручную
+                // Закрываем через небольшую паузу
                 setTimeout(() => tg.close(), 100);
-            } catch (e) {
-                console.error("Error sending data:", e);
-                alert("Ошибка при отправке данных: " + e.message);
+            } else {
+                alert("Метод sendData не поддерживается в этом клиенте.");
+                tg.close();
             }
         }
     </script>
